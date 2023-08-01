@@ -22,38 +22,42 @@ def home():
 
 @app.route('/start_conversation', methods=['POST'])
 def start_conversation():
-    audio_file = request.files['audio']
-    native_language = request.form['native_language']
-    target_language = request.form['target_language']
+    try:
+        audio_file = request.files['audio']
+        native_language = request.form['native_language']
+        target_language = request.form['target_language']
+        
+        # Guarda el audio blob del usuario como .mp3
+        wav_filename = f"./audio_file.mp3"
+        audio_file.save(wav_filename)
+        # Utiliza Whisper para convertir el audio a texto
+        transcript = whisper(wav_filename)
     
-    # Guarda el audio blob del usuario como .mp3
-    wav_filename = f"./audio_file.mp3"
-    audio_file.save(wav_filename)
-    # Utiliza Whisper para convertir el audio a texto
-    transcript = whisper(wav_filename)
-
-    # Utiliza GPT para generar una respuesta en el idioma nativo y en el idioma objetivo
-    response_text, feedback = start_dialog("", native_language, target_language, transcript)
+        # Utiliza GPT para generar una respuesta en el idioma nativo y en el idioma objetivo
+        response_text, feedback = start_dialog("", native_language, target_language, transcript)
+        
+        # Utiliza ElevenLabs para convertir el texto de respuesta a voz en ambos idiomas
+        file_path = text_to_speech(response_text)
+        with open(file_path,'rb') as wav_file:
+            wav_data = wav_file.read()
+        # Codificar en base64 para mandar el audio al front
+        wav_base64 = base64.b64encode(wav_data)
     
-    # Utiliza ElevenLabs para convertir el texto de respuesta a voz en ambos idiomas
-    file_path = text_to_speech(response_text)
-    with open(file_path,'rb') as wav_file:
-        wav_data = wav_file.read()
-    # Codificar en base64 para mandar el audio al front
-    wav_base64 = base64.b64encode(wav_data)
-
-    target_audio_base64 = wav_base64.decode()
+        target_audio_base64 = wav_base64.decode()
+        
     
-
-    # Envía el audio como una respuesta de archivo
-    response_data = {
-        'text_response': response_text,
-        'audio_response': target_audio_base64,
-        'transcript': transcript,
-        'feedback': feedback
-    }
-    
-    return jsonify(response_data)
+        # Envía el audio como una respuesta de archivo
+        response_data = {
+            'text_response': response_text,
+            'audio_response': target_audio_base64,
+            'transcript': transcript,
+            'feedback': feedback
+        }
+        
+        return jsonify(response_data)
+     except Exception as e:
+        print(f"Error: {str(e)}")  
+        return jsonify({'error': str(e)}), 500
 
 def whisper(wav_filename):
     openai.api_key = whisper_api_key
