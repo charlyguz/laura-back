@@ -55,7 +55,7 @@ def start_conversation():
         }
         
         return jsonify(response_data)
-     except Exception as e:
+    except Exception as e:
         print(f"Error: {str(e)}")  
         return jsonify({'error': str(e)}), 500
 
