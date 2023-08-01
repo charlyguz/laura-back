@@ -89,4 +89,4 @@ def get_response(text, native_language, target_language):
     return response_text
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run()
