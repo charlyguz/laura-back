@@ -14,7 +14,7 @@ elevenlabs_api_key = os.environ['ELEVENLABS_API_KEY']
 set_api_key(elevenlabs_api_key) 
 openai.api_key = gpt_api_key
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.route('/')
 def home():
