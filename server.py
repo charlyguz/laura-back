@@ -16,6 +16,10 @@ openai.api_key = gpt_api_key
 app = Flask(__name__)
 CORS(app)
 
+@app.route('/')
+def home():
+    return 'Backend server is running'
+
 @app.route('/start_conversation', methods=['POST'])
 def start_conversation():
     audio_file = request.files['audio']
